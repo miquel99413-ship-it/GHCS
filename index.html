@@ -1,7 +1,13 @@
-<meta charset="UTF-8">
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>GHCS</title>
+
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
   <style>
     body {
@@ -16,7 +22,7 @@
 
     .app {
       width: 100%;
-      max-width: 500px;
+      max-width: 520px;
       padding: 24px;
       box-sizing: border-box;
     }
@@ -28,29 +34,54 @@
     .subtitulo {
       color: #9ca3af;
       margin-top: 0;
+      margin-bottom: 28px;
+    }
+
+    .estado-mqtt {
+      margin-bottom: 22px;
+      font-size: 15px;
+      color: #f59e0b;
+    }
+
+    .estado-mqtt.conectado {
+      color: #63e6a3;
     }
 
     .tarjeta {
       background: #1f2937;
       border-radius: 18px;
-      padding: 24px;
-      margin-top: 30px;
+      padding: 22px;
+      margin-bottom: 16px;
+      box-sizing: border-box;
     }
 
     .etiqueta {
       color: #9ca3af;
-      font-size: 16px;
+      font-size: 15px;
+      margin-bottom: 8px;
     }
 
-    .temperatura {
-      font-size: 56px;
+    .valor {
+      font-size: 38px;
       font-weight: bold;
-      margin-top: 10px;
     }
 
-    .estado {
-      margin-top: 20px;
-      color: #f59e0b;
+    .subvalor {
+      color: #9ca3af;
+      margin-top: 7px;
+      font-size: 14px;
+    }
+
+    .fila {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 430px) {
+      .fila {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -62,16 +93,183 @@
     <h1>GHCS</h1>
     <p class="subtitulo">Greenhouse Climate System</p>
 
-    <div class="tarjeta">
-      <div class="etiqueta">Temperatura</div>
-      <div class="temperatura" id="temperatura">--.- °C</div>
-    </div>
-
-    <div class="estado">
+    <div class="estado-mqtt" id="estadoMQTT">
       ● MQTT desconectado
     </div>
 
+    <div class="tarjeta">
+      <div class="etiqueta">Temperatura</div>
+      <div class="valor" id="temperatura">--.- °C</div>
+    </div>
+
+    <div class="tarjeta">
+      <div class="etiqueta">Humedad</div>
+      <div class="valor" id="humedad">--.- %</div>
+    </div>
+
+    <div class="fila">
+
+      <div class="tarjeta">
+        <div class="etiqueta">Ventilador</div>
+        <div class="valor" id="ventilador">---</div>
+      </div>
+
+      <div class="tarjeta">
+        <div class="etiqueta">Modo</div>
+        <div class="valor" id="modo">---</div>
+      </div>
+
+    </div>
+
+    <div class="tarjeta">
+      <div class="etiqueta">Batería</div>
+      <div class="valor">
+        <span id="bateriaPorcentaje">--</span> %
+      </div>
+
+      <div class="subvalor">
+        <span id="bateriaVoltaje">-.--</span> V
+      </div>
+    </div>
+
   </main>
+
+
+  <script>
+    const MQTT_URL =
+      "wss://f64ce5728a5b44c483d3b25e6188bd9a.s1.eu.hivemq.cloud:8884/mqtt";
+
+    const MQTT_USER = "ghcs_web";
+
+    const MQTT_PASSWORD = "K8/zP%f6402";
+
+
+    const cliente = mqtt.connect(MQTT_URL, {
+      username: MQTT_USER,
+      password: MQTT_PASSWORD,
+
+      clean: true,
+
+      connectTimeout: 10000,
+
+      reconnectPeriod: 3000,
+
+      clientId:
+        "ghcs_web_" +
+        Math.random().toString(16).substring(2, 10)
+    });
+
+
+    cliente.on("connect", function () {
+
+      console.log("MQTT conectado");
+
+      const estado = document.getElementById("estadoMQTT");
+
+      estado.textContent = "● MQTT conectado";
+      estado.classList.add("conectado");
+
+
+      cliente.subscribe([
+        "ghcs/temperatura",
+        "ghcs/humedad",
+        "ghcs/ventilador",
+        "ghcs/modo",
+        "ghcs/bateria/voltaje",
+        "ghcs/bateria/porcentaje"
+      ]);
+
+    });
+
+
+    cliente.on("reconnect", function () {
+
+      const estado = document.getElementById("estadoMQTT");
+
+      estado.textContent = "● Reconectando MQTT...";
+      estado.classList.remove("conectado");
+
+    });
+
+
+    cliente.on("offline", function () {
+
+      const estado = document.getElementById("estadoMQTT");
+
+      estado.textContent = "● MQTT desconectado";
+      estado.classList.remove("conectado");
+
+    });
+
+
+    cliente.on("error", function (error) {
+
+      console.error("Error MQTT:", error);
+
+      const estado = document.getElementById("estadoMQTT");
+
+      estado.textContent = "● Error MQTT";
+      estado.classList.remove("conectado");
+
+    });
+
+
+    cliente.on("message", function (topic, mensaje) {
+
+      const valor = mensaje.toString();
+
+      console.log(topic, valor);
+
+
+      if (topic === "ghcs/temperatura") {
+
+        document.getElementById("temperatura").textContent =
+          valor + " °C";
+
+      }
+
+
+      else if (topic === "ghcs/humedad") {
+
+        document.getElementById("humedad").textContent =
+          valor + " %";
+
+      }
+
+
+      else if (topic === "ghcs/ventilador") {
+
+        document.getElementById("ventilador").textContent =
+          valor;
+
+      }
+
+
+      else if (topic === "ghcs/modo") {
+
+        document.getElementById("modo").textContent =
+          valor;
+
+      }
+
+
+      else if (topic === "ghcs/bateria/voltaje") {
+
+        document.getElementById("bateriaVoltaje").textContent =
+          valor;
+
+      }
+
+
+      else if (topic === "ghcs/bateria/porcentaje") {
+
+        document.getElementById("bateriaPorcentaje").textContent =
+          valor;
+
+      }
+
+    });
+  </script>
 
 </body>
 
