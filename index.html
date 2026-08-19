@@ -3,272 +3,1062 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
+
+  <meta name="theme-color" content="#0d1312">
 
   <title>GHCS</title>
 
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
   <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #111827;
-      color: white;
+      min-height: 100vh;
+
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+      background: #0d1312;
+      color: #ffffff;
+
       display: flex;
       justify-content: center;
-      min-height: 100vh;
     }
+
 
     .app {
       width: 100%;
       max-width: 520px;
-      padding: 24px;
-      box-sizing: border-box;
+
+      padding:
+        max(24px, env(safe-area-inset-top))
+        20px
+        max(28px, env(safe-area-inset-bottom));
+
+      margin: 0 auto;
+    }
+
+
+    /* CABECERA */
+
+    .cabecera {
+      margin-bottom: 24px;
     }
 
     h1 {
-      margin-bottom: 4px;
+      margin: 0;
+      font-size: 34px;
+      letter-spacing: 1px;
     }
 
     .subtitulo {
-      color: #9ca3af;
-      margin-top: 0;
-      margin-bottom: 28px;
+      margin: 4px 0 0;
+      color: #63e6a3;
+      font-size: 14px;
+    }
+
+
+    /* CONEXIÓN */
+
+    .conexion {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+
+      margin-bottom: 20px;
+
+      font-size: 13px;
     }
 
     .estado-mqtt {
-      margin-bottom: 22px;
-      font-size: 15px;
       color: #f59e0b;
+      font-weight: 600;
     }
 
     .estado-mqtt.conectado {
       color: #63e6a3;
     }
 
-    .tarjeta {
-      background: #1f2937;
-      border-radius: 18px;
-      padding: 22px;
-      margin-bottom: 16px;
-      box-sizing: border-box;
+    .ultima-actualizacion {
+      color: #7f8c8a;
+      text-align: right;
+      font-size: 12px;
     }
 
+
+    /* TARJETAS */
+
+    .tarjeta {
+      position: relative;
+
+      background: #19211f;
+
+      border: 1px solid #293331;
+      border-left: 4px solid #485451;
+
+      border-radius: 17px;
+
+      padding: 20px;
+
+      margin-bottom: 14px;
+
+      overflow: hidden;
+    }
+
+    .tarjeta-temperatura {
+      border-left-color: #ff7a00;
+    }
+
+    .tarjeta-humedad {
+      border-left-color: #63e6a3;
+    }
+
+    .tarjeta-bateria {
+      border-left-color: #63e6a3;
+    }
+
+
     .etiqueta {
-      color: #9ca3af;
-      font-size: 15px;
-      margin-bottom: 8px;
+      color: #aeb9b7;
+      font-size: 13px;
+      margin-bottom: 7px;
     }
 
     .valor {
-      font-size: 38px;
-      font-weight: bold;
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .valor-grande {
+      font-size: 42px;
     }
 
     .subvalor {
-      color: #9ca3af;
       margin-top: 7px;
-      font-size: 14px;
+
+      color: #8e9a98;
+
+      font-size: 13px;
     }
+
+
+    /* VENTILADOR Y MODO */
 
     .fila {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      gap: 14px;
     }
 
+    .estado-badge {
+      display: inline-block;
+
+      padding: 7px 11px;
+
+      margin-top: 2px;
+
+      border-radius: 9px;
+
+      background: #28302f;
+
+      font-size: 25px;
+      font-weight: 700;
+    }
+
+    .vent-off {
+      color: #aeb9b7;
+    }
+
+    .vent-v1 {
+      color: #63e6a3;
+    }
+
+    .vent-v2 {
+      color: #ffd166;
+    }
+
+    .vent-v3 {
+      color: #ff7a00;
+    }
+
+    .modo-auto {
+      color: #63e6a3;
+    }
+
+    .modo-manual {
+      color: #ffb84d;
+    }
+
+
+    /* BATERÍA */
+
+    .cabecera-bateria {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .voltaje {
+      color: #9aa6a4;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .barra-bateria {
+      width: 100%;
+      height: 9px;
+
+      margin-top: 16px;
+
+      background: #303836;
+
+      border-radius: 20px;
+
+      overflow: hidden;
+    }
+
+    .relleno-bateria {
+      width: 0%;
+      height: 100%;
+
+      background: #63e6a3;
+
+      border-radius: inherit;
+
+      transition:
+        width 0.5s ease,
+        background-color 0.3s ease;
+    }
+
+
+    /* PIE */
+
+    .pie {
+      margin-top: 20px;
+
+      text-align: center;
+
+      color: #52605d;
+
+      font-size: 11px;
+    }
+
+
+    /* MÓVIL */
+
     @media (max-width: 430px) {
+
+      .app {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      h1 {
+        font-size: 31px;
+      }
+
+      .valor-grande {
+        font-size: 39px;
+      }
+
+      .tarjeta {
+        padding: 18px;
+      }
+
+      .fila {
+        gap: 10px;
+      }
+
+      .estado-badge {
+        font-size: 23px;
+      }
+
+    }
+
+
+    @media (max-width: 350px) {
+
       .fila {
         grid-template-columns: 1fr;
       }
+
     }
+
   </style>
 </head>
+
 
 <body>
 
   <main class="app">
 
-    <h1>GHCS</h1>
-    <p class="subtitulo">Greenhouse Climate System</p>
+    <header class="cabecera">
 
-    <div class="estado-mqtt" id="estadoMQTT">
-      ● MQTT desconectado
+      <h1>GHCS</h1>
+
+      <p class="subtitulo">
+        Greenhouse Climate System
+      </p>
+
+    </header>
+
+
+    <div class="conexion">
+
+      <div
+        class="estado-mqtt"
+        id="estadoMQTT"
+      >
+        ● MQTT desconectado
+      </div>
+
+      <div
+        class="ultima-actualizacion"
+        id="ultimaActualizacion"
+      >
+        Sin datos
+      </div>
+
     </div>
 
-    <div class="tarjeta">
-      <div class="etiqueta">Temperatura</div>
-      <div class="valor" id="temperatura">--.- °C</div>
-    </div>
 
-    <div class="tarjeta">
-      <div class="etiqueta">Humedad</div>
-      <div class="valor" id="humedad">--.- %</div>
-    </div>
+    <!-- TEMPERATURA -->
+
+    <section class="tarjeta tarjeta-temperatura">
+
+      <div class="etiqueta">
+        Temperatura
+      </div>
+
+      <div
+        class="valor valor-grande"
+        id="temperatura"
+      >
+        --.- °C
+      </div>
+
+    </section>
+
+
+    <!-- HUMEDAD -->
+
+    <section class="tarjeta tarjeta-humedad">
+
+      <div class="etiqueta">
+        Humedad
+      </div>
+
+      <div
+        class="valor valor-grande"
+        id="humedad"
+      >
+        --.- %
+      </div>
+
+    </section>
+
+
+    <!-- VENTILADOR / MODO -->
 
     <div class="fila">
 
-      <div class="tarjeta">
-        <div class="etiqueta">Ventilador</div>
-        <div class="valor" id="ventilador">---</div>
-      </div>
+      <section class="tarjeta">
 
-      <div class="tarjeta">
-        <div class="etiqueta">Modo</div>
-        <div class="valor" id="modo">---</div>
-      </div>
+        <div class="etiqueta">
+          Ventilador
+        </div>
+
+        <div
+          class="estado-badge"
+          id="ventilador"
+        >
+          ---
+        </div>
+
+      </section>
+
+
+      <section class="tarjeta">
+
+        <div class="etiqueta">
+          Modo
+        </div>
+
+        <div
+          class="estado-badge"
+          id="modo"
+        >
+          ---
+        </div>
+
+      </section>
 
     </div>
 
-    <div class="tarjeta">
-      <div class="etiqueta">Batería</div>
-      <div class="valor">
-        <span id="bateriaPorcentaje">--</span> %
+
+    <!-- BATERÍA -->
+
+    <section
+      class="tarjeta tarjeta-bateria"
+      id="tarjetaBateria"
+    >
+
+      <div class="etiqueta">
+        Batería
       </div>
 
-      <div class="subvalor">
-        <span id="bateriaVoltaje">-.--</span> V
+
+      <div class="cabecera-bateria">
+
+        <div class="valor">
+
+          <span id="bateriaPorcentaje">
+            --
+          </span> %
+
+        </div>
+
+
+        <div class="voltaje">
+
+          <span id="bateriaVoltaje">
+            -.--
+          </span> V
+
+        </div>
+
       </div>
+
+
+      <div class="barra-bateria">
+
+        <div
+          class="relleno-bateria"
+          id="rellenoBateria"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <div class="pie">
+      GHCS · Remote Monitoring
     </div>
 
   </main>
 
 
+
   <script>
+
+    /* =========================
+       CONFIGURACIÓN MQTT
+       ========================= */
+
     const MQTT_URL =
       "wss://f64ce5728a5b44c483d3b25e6188bd9a.s1.eu.hivemq.cloud:8884/mqtt";
 
-    const MQTT_USER = "ghcs_web";
+    const MQTT_USER =
+      "ghcs_web";
 
-    const MQTT_PASSWORD = "K8/zP%f6402";
-
-
-    const cliente = mqtt.connect(MQTT_URL, {
-      username: MQTT_USER,
-      password: MQTT_PASSWORD,
-
-      clean: true,
-
-      connectTimeout: 10000,
-
-      reconnectPeriod: 3000,
-
-      clientId:
-        "ghcs_web_" +
-        Math.random().toString(16).substring(2, 10)
-    });
+    const MQTT_PASSWORD =
+      "K8/zP%f6402";
 
 
-    cliente.on("connect", function () {
+    /* =========================
+       VARIABLES
+       ========================= */
 
-      console.log("MQTT conectado");
-
-      const estado = document.getElementById("estadoMQTT");
-
-      estado.textContent = "● MQTT conectado";
-      estado.classList.add("conectado");
+    let ultimaRecepcion = null;
 
 
-      cliente.subscribe([
-        "ghcs/temperatura",
-        "ghcs/humedad",
-        "ghcs/ventilador",
-        "ghcs/modo",
-        "ghcs/bateria/voltaje",
-        "ghcs/bateria/porcentaje"
-      ]);
+    /* =========================
+       CONEXIÓN MQTT
+       ========================= */
 
-    });
+    const cliente = mqtt.connect(
+      MQTT_URL,
+      {
 
+        username:
+          MQTT_USER,
 
-    cliente.on("reconnect", function () {
+        password:
+          MQTT_PASSWORD,
 
-      const estado = document.getElementById("estadoMQTT");
+        clean:
+          true,
 
-      estado.textContent = "● Reconectando MQTT...";
-      estado.classList.remove("conectado");
+        connectTimeout:
+          10000,
 
-    });
+        reconnectPeriod:
+          3000,
 
+        clientId:
+          "ghcs_web_" +
+          Math.random()
+            .toString(16)
+            .substring(2, 10)
 
-    cliente.on("offline", function () {
-
-      const estado = document.getElementById("estadoMQTT");
-
-      estado.textContent = "● MQTT desconectado";
-      estado.classList.remove("conectado");
-
-    });
-
-
-    cliente.on("error", function (error) {
-
-      console.error("Error MQTT:", error);
-
-      const estado = document.getElementById("estadoMQTT");
-
-      estado.textContent = "● Error MQTT";
-      estado.classList.remove("conectado");
-
-    });
+      }
+    );
 
 
-    cliente.on("message", function (topic, mensaje) {
+    /* =========================
+       MQTT CONECTADO
+       ========================= */
 
-      const valor = mensaje.toString();
+    cliente.on(
+      "connect",
+      function ()
+      {
 
-      console.log(topic, valor);
+        console.log(
+          "MQTT conectado"
+        );
+
+        const estado =
+          document.getElementById(
+            "estadoMQTT"
+          );
+
+        estado.textContent =
+          "● MQTT conectado";
+
+        estado.classList.add(
+          "conectado"
+        );
 
 
-      if (topic === "ghcs/temperatura") {
+        cliente.subscribe(
+          [
 
-        document.getElementById("temperatura").textContent =
-          valor + " °C";
+            "ghcs/temperatura",
+
+            "ghcs/humedad",
+
+            "ghcs/ventilador",
+
+            "ghcs/modo",
+
+            "ghcs/bateria/voltaje",
+
+            "ghcs/bateria/porcentaje"
+
+          ]
+        );
+
+      }
+    );
+
+
+    /* =========================
+       RECONECTANDO
+       ========================= */
+
+    cliente.on(
+      "reconnect",
+      function ()
+      {
+
+        const estado =
+          document.getElementById(
+            "estadoMQTT"
+          );
+
+        estado.textContent =
+          "● Reconectando MQTT...";
+
+        estado.classList.remove(
+          "conectado"
+        );
+
+      }
+    );
+
+
+    /* =========================
+       DESCONECTADO
+       ========================= */
+
+    cliente.on(
+      "offline",
+      function ()
+      {
+
+        const estado =
+          document.getElementById(
+            "estadoMQTT"
+          );
+
+        estado.textContent =
+          "● MQTT desconectado";
+
+        estado.classList.remove(
+          "conectado"
+        );
+
+      }
+    );
+
+
+    /* =========================
+       ERROR
+       ========================= */
+
+    cliente.on(
+      "error",
+      function (error)
+      {
+
+        console.error(
+          "Error MQTT:",
+          error
+        );
+
+        const estado =
+          document.getElementById(
+            "estadoMQTT"
+          );
+
+        estado.textContent =
+          "● Error MQTT";
+
+        estado.classList.remove(
+          "conectado"
+        );
+
+      }
+    );
+
+
+    /* =========================
+       DATOS RECIBIDOS
+       ========================= */
+
+    cliente.on(
+      "message",
+      function (
+        topic,
+        mensaje
+      )
+      {
+
+        const valor =
+          mensaje.toString();
+
+
+        console.log(
+          topic,
+          valor
+        );
+
+
+        ultimaRecepcion =
+          Date.now();
+
+
+        /* TEMPERATURA */
+
+        if (
+          topic ===
+          "ghcs/temperatura"
+        )
+        {
+
+          document
+            .getElementById(
+              "temperatura"
+            )
+            .textContent =
+            valor + " °C";
+
+        }
+
+
+        /* HUMEDAD */
+
+        else if (
+          topic ===
+          "ghcs/humedad"
+        )
+        {
+
+          document
+            .getElementById(
+              "humedad"
+            )
+            .textContent =
+            valor + " %";
+
+        }
+
+
+        /* VENTILADOR */
+
+        else if (
+          topic ===
+          "ghcs/ventilador"
+        )
+        {
+
+          actualizarVentilador(
+            valor
+          );
+
+        }
+
+
+        /* MODO */
+
+        else if (
+          topic ===
+          "ghcs/modo"
+        )
+        {
+
+          actualizarModo(
+            valor
+          );
+
+        }
+
+
+        /* VOLTAJE */
+
+        else if (
+          topic ===
+          "ghcs/bateria/voltaje"
+        )
+        {
+
+          document
+            .getElementById(
+              "bateriaVoltaje"
+            )
+            .textContent =
+            valor;
+
+        }
+
+
+        /* PORCENTAJE BATERÍA */
+
+        else if (
+          topic ===
+          "ghcs/bateria/porcentaje"
+        )
+        {
+
+          document
+            .getElementById(
+              "bateriaPorcentaje"
+            )
+            .textContent =
+            valor;
+
+          actualizarBateria(
+            valor
+          );
+
+        }
+
+      }
+    );
+
+
+    /* =========================
+       VENTILADOR
+       ========================= */
+
+    function actualizarVentilador(
+      estado
+    )
+    {
+
+      const elemento =
+        document.getElementById(
+          "ventilador"
+        );
+
+
+      elemento.textContent =
+        estado;
+
+
+      elemento.className =
+        "estado-badge";
+
+
+      if (
+        estado === "APAGADO"
+      )
+      {
+
+        elemento.classList.add(
+          "vent-off"
+        );
 
       }
 
+      else if (
+        estado === "V1"
+      )
+      {
 
-      else if (topic === "ghcs/humedad") {
-
-        document.getElementById("humedad").textContent =
-          valor + " %";
-
-      }
-
-
-      else if (topic === "ghcs/ventilador") {
-
-        document.getElementById("ventilador").textContent =
-          valor;
+        elemento.classList.add(
+          "vent-v1"
+        );
 
       }
 
+      else if (
+        estado === "V2"
+      )
+      {
 
-      else if (topic === "ghcs/modo") {
-
-        document.getElementById("modo").textContent =
-          valor;
-
-      }
-
-
-      else if (topic === "ghcs/bateria/voltaje") {
-
-        document.getElementById("bateriaVoltaje").textContent =
-          valor;
+        elemento.classList.add(
+          "vent-v2"
+        );
 
       }
 
+      else if (
+        estado === "V3"
+      )
+      {
 
-      else if (topic === "ghcs/bateria/porcentaje") {
-
-        document.getElementById("bateriaPorcentaje").textContent =
-          valor;
+        elemento.classList.add(
+          "vent-v3"
+        );
 
       }
 
-    });
+    }
+
+
+    /* =========================
+       MODO
+       ========================= */
+
+    function actualizarModo(
+      modo
+    )
+    {
+
+      const elemento =
+        document.getElementById(
+          "modo"
+        );
+
+
+      elemento.textContent =
+        modo;
+
+
+      elemento.className =
+        "estado-badge";
+
+
+      if (
+        modo === "AUTO"
+      )
+      {
+
+        elemento.classList.add(
+          "modo-auto"
+        );
+
+      }
+
+      else
+      {
+
+        elemento.classList.add(
+          "modo-manual"
+        );
+
+      }
+
+    }
+
+
+    /* =========================
+       BATERÍA
+       ========================= */
+
+    function actualizarBateria(
+      valor
+    )
+    {
+
+      let porcentaje =
+        parseFloat(
+          valor
+        );
+
+
+      porcentaje =
+        Math.max(
+          0,
+          Math.min(
+            100,
+            porcentaje
+          )
+        );
+
+
+      const barra =
+        document.getElementById(
+          "rellenoBateria"
+        );
+
+
+      const tarjeta =
+        document.getElementById(
+          "tarjetaBateria"
+        );
+
+
+      barra.style.width =
+        porcentaje + "%";
+
+
+      if (
+        porcentaje > 60
+      )
+      {
+
+        barra.style.background =
+          "#63e6a3";
+
+        tarjeta.style.borderLeftColor =
+          "#63e6a3";
+
+      }
+
+      else if (
+        porcentaje > 30
+      )
+      {
+
+        barra.style.background =
+          "#ffb84d";
+
+        tarjeta.style.borderLeftColor =
+          "#ffb84d";
+
+      }
+
+      else
+      {
+
+        barra.style.background =
+          "#ff4d4d";
+
+        tarjeta.style.borderLeftColor =
+          "#ff4d4d";
+
+      }
+
+    }
+
+
+    /* =========================
+       ÚLTIMA ACTUALIZACIÓN
+       ========================= */
+
+    setInterval(
+      function ()
+      {
+
+        const elemento =
+          document.getElementById(
+            "ultimaActualizacion"
+          );
+
+
+        if (
+          ultimaRecepcion === null
+        )
+        {
+
+          elemento.textContent =
+            "Sin datos";
+
+          return;
+
+        }
+
+
+        const segundos =
+          Math.floor(
+            (
+              Date.now() -
+              ultimaRecepcion
+            ) / 1000
+          );
+
+
+        if (
+          segundos < 2
+        )
+        {
+
+          elemento.textContent =
+            "Actualizado ahora";
+
+        }
+
+        else if (
+          segundos < 60
+        )
+        {
+
+          elemento.textContent =
+            "Hace " +
+            segundos +
+            " s";
+
+        }
+
+        else
+        {
+
+          const minutos =
+            Math.floor(
+              segundos / 60
+            );
+
+          elemento.textContent =
+            "Hace " +
+            minutos +
+            " min";
+
+        }
+
+      },
+      1000
+    );
+
   </script>
 
 </body>
