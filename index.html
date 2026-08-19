@@ -1,0 +1,78 @@
+<meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>GHCS</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111827;
+      color: white;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 500px;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      margin-bottom: 4px;
+    }
+
+    .subtitulo {
+      color: #9ca3af;
+      margin-top: 0;
+    }
+
+    .tarjeta {
+      background: #1f2937;
+      border-radius: 18px;
+      padding: 24px;
+      margin-top: 30px;
+    }
+
+    .etiqueta {
+      color: #9ca3af;
+      font-size: 16px;
+    }
+
+    .temperatura {
+      font-size: 56px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .estado {
+      margin-top: 20px;
+      color: #f59e0b;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="app">
+
+    <h1>GHCS</h1>
+    <p class="subtitulo">Greenhouse Climate System</p>
+
+    <div class="tarjeta">
+      <div class="etiqueta">Temperatura</div>
+      <div class="temperatura" id="temperatura">--.- °C</div>
+    </div>
+
+    <div class="estado">
+      ● MQTT desconectado
+    </div>
+
+  </main>
+
+</body>
+
+</html>
