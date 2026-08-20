@@ -620,42 +620,119 @@
          CONTROL REMOTO
          ========================= -->
 
-    <section class="tarjeta">
-      <div class="etiqueta">
-        Control remoto
-      </div>
+    <!-- =========================
+     CONTROL REMOTO
+     ========================= -->
 
-      <button
-        id="botonV3"
-        onclick="enviarComando('V3')"
-        style="
-          width: 100%;
-          padding: 14px;
-          margin-top: 8px;
-          border: 0;
-          border-radius: 10px;
-          background: #ff7a00;
-          color: white;
-          font-size: 18px;
-          font-weight: 700;
-          cursor: pointer;
-        "
-      >
-        V3
-      </button>
+<section class="tarjeta">
 
-      <div
-        id="estadoControl"
-        style="
-          margin-top: 10px;
-          font-size: 12px;
-          color: #7f8c8a;
-        "
-      >
-        Listo
-      </div>
-    </section>
+  <div class="etiqueta">
+    Control remoto
+  </div>
 
+  <div
+    style="
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    "
+  >
+
+    <button
+      onclick="enviarComando('AUTO')"
+      style="
+        padding: 14px 8px;
+        border: 0;
+        border-radius: 10px;
+        background: #2c6e49;
+        color: white;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+      "
+    >
+      AUTO
+    </button>
+
+    <button
+      onclick="enviarComando('APAGADO')"
+      style="
+        padding: 14px 8px;
+        border: 0;
+        border-radius: 10px;
+        background: #3b4341;
+        color: white;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+      "
+    >
+      OFF
+    </button>
+
+    <button
+      onclick="enviarComando('V1')"
+      style="
+        padding: 14px 8px;
+        border: 0;
+        border-radius: 10px;
+        background: #2f855a;
+        color: white;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+      "
+    >
+      V1
+    </button>
+
+    <button
+      onclick="enviarComando('V2')"
+      style="
+        padding: 14px 8px;
+        border: 0;
+        border-radius: 10px;
+        background: #d69e2e;
+        color: white;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+      "
+    >
+      V2
+    </button>
+
+    <button
+      onclick="enviarComando('V3')"
+      style="
+        padding: 14px 8px;
+        border: 0;
+        border-radius: 10px;
+        background: #ff7a00;
+        color: white;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+      "
+    >
+      V3
+    </button>
+
+  </div>
+
+  <div
+    id="estadoControl"
+    style="
+      margin-top: 12px;
+      font-size: 12px;
+      color: #7f8c8a;
+    "
+  >
+    Listo
+  </div>
+
+</section>
 
     <!-- =========================
          HISTÓRICO
