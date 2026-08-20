@@ -249,6 +249,48 @@
         background-color 0.3s ease;
     }
 
+    <!-- =========================
+     CONTROL REMOTO - PRUEBA V3
+     ========================= -->
+
+<section class="tarjeta">
+
+  <div class="etiqueta">
+    Control remoto
+  </div>
+
+  <button
+    id="botonV3"
+    onclick="enviarComando('V3')"
+    style="
+      width: 100%;
+      padding: 14px;
+      margin-top: 8px;
+      border: 0;
+      border-radius: 10px;
+      background: #ff7a00;
+      color: white;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+    "
+  >
+    V3
+  </button>
+
+  <div
+    id="estadoControl"
+    style="
+      margin-top: 10px;
+      font-size: 12px;
+      color: #7f8c8a;
+    "
+  >
+    Listo
+  </div>
+
+</section>
+    
     /* =========================
        HISTÓRICO
        ========================= */
@@ -777,6 +819,8 @@
     const API_HISTORICO =
       API_BASE + "/historico";
 
+    const API_CONTROL =
+  API_BASE + "/control";
 
     /* =========================
        TIEMPOS
@@ -1962,7 +2006,124 @@
         }
       );
 
+/* =========================
+   CONTROL REMOTO
+   ========================= */
 
+async function enviarComando(comando)
+{
+  const estado =
+    document.getElementById(
+      "estadoControl"
+    );
+
+  let token =
+    localStorage.getItem(
+      "ghcs_control_token"
+    );
+
+  if (!token)
+  {
+    token = prompt(
+      "Introduce el token de control del GHCS:"
+    );
+
+    if (!token)
+    {
+      estado.textContent =
+        "Control cancelado";
+
+      return;
+    }
+
+    localStorage.setItem(
+      "ghcs_control_token",
+      token
+    );
+  }
+
+  estado.textContent =
+    "Enviando " +
+    comando +
+    "...";
+
+  try
+  {
+    const respuesta =
+      await fetch(
+        API_CONTROL,
+        {
+          method: "POST",
+
+          headers:
+          {
+            "Content-Type":
+              "application/json",
+
+            "X-Control-Token":
+              token
+          },
+
+          body:
+            JSON.stringify(
+              {
+                comando:
+                  comando
+              }
+            )
+        }
+      );
+
+    const datos =
+      await respuesta.json();
+
+    if (!respuesta.ok)
+    {
+      if (
+        respuesta.status ===
+        401
+      )
+      {
+        localStorage.removeItem(
+          "ghcs_control_token"
+        );
+      }
+
+      throw new Error(
+        datos.error ||
+        "Error HTTP " +
+        respuesta.status
+      );
+    }
+
+    estado.textContent =
+      "✓ " +
+      comando +
+      " enviado";
+
+    /*
+      Esperamos un poco para que
+      ESP32 procese el comando.
+    */
+
+    setTimeout(
+      consultarGHCS,
+      1500
+    );
+  }
+
+  catch (error)
+  {
+    console.error(
+      "Error control GHCS:",
+      error
+    );
+
+    estado.textContent =
+      "Error: " +
+      error.message;
+  }
+}
     /* =========================
        INICIO
        ========================= */
