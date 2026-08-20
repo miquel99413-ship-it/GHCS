@@ -14,9 +14,18 @@
   <title>GHCS</title>
 
   <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <style>
+<!-- Fuentes -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500;600;700&display=swap"
+  rel="stylesheet"
+>
+
+<style>
     * {
       box-sizing: border-box;
     }
@@ -25,12 +34,7 @@
       margin: 0;
       min-height: 100vh;
 
-      font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        Arial,
-        sans-serif;
+      font-family: "Inter", sans-serif;
 
       background: #0d1312;
       color: #ffffff;
@@ -441,6 +445,27 @@
         font-size: 12px;
       }
     }
+  /* =========================
+   TIPOGRAFÍA GHCS
+   ========================= */
+
+/* Valores numéricos */
+.valor,
+.estado-badge,
+.voltaje,
+.dato-grafica {
+  font-family: "Roboto Mono", monospace;
+}
+
+/* Botones */
+button {
+  font-family: "Roboto Mono", monospace;
+}
+
+/* Título provisionalmente */
+h1 {
+  font-weight: 700;
+}
   </style>
 </head>
 
