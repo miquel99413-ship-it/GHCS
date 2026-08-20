@@ -13,10 +13,7 @@
 
   <title>GHCS</title>
 
-  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-
   <style>
-
     * {
       box-sizing: border-box;
     }
@@ -39,7 +36,6 @@
       justify-content: center;
     }
 
-
     .app {
       width: 100%;
       max-width: 520px;
@@ -51,7 +47,6 @@
 
       margin: 0 auto;
     }
-
 
     /* CABECERA */
 
@@ -71,7 +66,6 @@
       font-size: 14px;
     }
 
-
     /* CONEXIÓN */
 
     .conexion {
@@ -85,13 +79,21 @@
       font-size: 13px;
     }
 
-    .estado-mqtt {
+    .estado-ghcs {
       color: #f59e0b;
       font-weight: 600;
     }
 
-    .estado-mqtt.conectado {
+    .estado-ghcs.online {
       color: #63e6a3;
+    }
+
+    .estado-ghcs.espera {
+      color: #f59e0b;
+    }
+
+    .estado-ghcs.offline {
+      color: #ff4d4d;
     }
 
     .ultima-actualizacion {
@@ -99,7 +101,6 @@
       text-align: right;
       font-size: 12px;
     }
-
 
     /* TARJETAS */
 
@@ -132,7 +133,6 @@
       border-left-color: #63e6a3;
     }
 
-
     .etiqueta {
       color: #aeb9b7;
       font-size: 13px;
@@ -148,15 +148,6 @@
     .valor-grande {
       font-size: 42px;
     }
-
-    .subvalor {
-      margin-top: 7px;
-
-      color: #8e9a98;
-
-      font-size: 13px;
-    }
-
 
     /* VENTILADOR Y MODO */
 
@@ -205,7 +196,6 @@
       color: #ffb84d;
     }
 
-
     /* BATERÍA */
 
     .cabecera-bateria {
@@ -246,7 +236,6 @@
         background-color 0.3s ease;
     }
 
-
     /* PIE */
 
     .pie {
@@ -258,7 +247,6 @@
 
       font-size: 11px;
     }
-
 
     /* MÓVIL */
 
@@ -288,21 +276,16 @@
       .estado-badge {
         font-size: 23px;
       }
-
     }
-
 
     @media (max-width: 350px) {
 
       .fila {
         grid-template-columns: 1fr;
       }
-
     }
-
   </style>
 </head>
-
 
 <body>
 
@@ -318,14 +301,13 @@
 
     </header>
 
-
     <div class="conexion">
 
       <div
-        class="estado-mqtt"
-        id="estadoMQTT"
+        class="estado-ghcs"
+        id="estadoGHCS"
       >
-        ● MQTT desconectado
+        ● Comprobando GHCS...
       </div>
 
       <div
@@ -336,7 +318,6 @@
       </div>
 
     </div>
-
 
     <!-- TEMPERATURA -->
 
@@ -355,7 +336,6 @@
 
     </section>
 
-
     <!-- HUMEDAD -->
 
     <section class="tarjeta tarjeta-humedad">
@@ -372,7 +352,6 @@
       </div>
 
     </section>
-
 
     <!-- VENTILADOR / MODO -->
 
@@ -393,7 +372,6 @@
 
       </section>
 
-
       <section class="tarjeta">
 
         <div class="etiqueta">
@@ -411,7 +389,6 @@
 
     </div>
 
-
     <!-- BATERÍA -->
 
     <section
@@ -423,7 +400,6 @@
         Batería
       </div>
 
-
       <div class="cabecera-bateria">
 
         <div class="valor">
@@ -434,7 +410,6 @@
 
         </div>
 
-
         <div class="voltaje">
 
           <span id="bateriaVoltaje">
@@ -444,7 +419,6 @@
         </div>
 
       </div>
-
 
       <div class="barra-bateria">
 
@@ -457,332 +431,410 @@
 
     </section>
 
-
     <div class="pie">
       GHCS · Remote Monitoring
     </div>
 
   </main>
 
-
-
   <script>
 
     /* =========================
-       CONFIGURACIÓN MQTT
+       CONFIGURACIÓN API
        ========================= */
 
-    const MQTT_URL =
-      "wss://f64ce5728a5b44c483d3b25e6188bd9a.s1.eu.hivemq.cloud:8884/mqtt";
+    const API_URL =
+      "https://ghcs-api.miquel99413.workers.dev/datos";
 
-    const MQTT_USER =
-      "ghcs_web";
+    /*
+      InfluxDB recibe un registro cada 5 minutos.
 
-    const MQTT_PASSWORD =
-      "pasword _MQTT";
+      < 7 min  = ONLINE
+      7-15 min = SIN DATOS RECIENTES
+      > 15 min = OFFLINE
+    */
+
+    const LIMITE_ONLINE =
+      7 * 60 * 1000;
+
+    const LIMITE_OFFLINE =
+      15 * 60 * 1000;
+
+    /*
+      Consultamos Cloudflare cada 30 segundos.
+
+      Esto NO hace que InfluxDB almacene más datos.
+      Solo comprueba si existe un registro nuevo.
+    */
+
+    const INTERVALO_CONSULTA =
+      30 * 1000;
+
+    let ultimoTimestamp = null;
 
 
     /* =========================
-       VARIABLES
+       CONSULTAR GHCS
        ========================= */
 
-    let ultimaRecepcion = null;
-
-
-    /* =========================
-       CONEXIÓN MQTT
-       ========================= */
-
-    const cliente = mqtt.connect(
-      MQTT_URL,
+    async function consultarGHCS()
+    {
+      try
       {
-
-        username:
-          MQTT_USER,
-
-        password:
-          MQTT_PASSWORD,
-
-        clean:
-          true,
-
-        connectTimeout:
-          10000,
-
-        reconnectPeriod:
-          3000,
-
-        clientId:
-          "ghcs_web_" +
-          Math.random()
-            .toString(16)
-            .substring(2, 10)
-
-      }
-    );
-
-
-    /* =========================
-       MQTT CONECTADO
-       ========================= */
-
-    cliente.on(
-      "connect",
-      function ()
-      {
-
-        console.log(
-          "MQTT conectado"
-        );
-
-        const estado =
-          document.getElementById(
-            "estadoMQTT"
+        const respuesta =
+          await fetch(
+            API_URL,
+            {
+              cache: "no-store"
+            }
           );
 
-        estado.textContent =
-          "● MQTT conectado";
-
-        estado.classList.add(
-          "conectado"
-        );
-
-
-        cliente.subscribe(
-          [
-
-            "ghcs/temperatura",
-
-            "ghcs/humedad",
-
-            "ghcs/ventilador",
-
-            "ghcs/modo",
-
-            "ghcs/bateria/voltaje",
-
-            "ghcs/bateria/porcentaje"
-
-          ]
-        );
-
-      }
-    );
-
-
-    /* =========================
-       RECONECTANDO
-       ========================= */
-
-    cliente.on(
-      "reconnect",
-      function ()
-      {
-
-        const estado =
-          document.getElementById(
-            "estadoMQTT"
+        if (!respuesta.ok)
+        {
+          throw new Error(
+            "HTTP " + respuesta.status
           );
+        }
 
-        estado.textContent =
-          "● Reconectando MQTT...";
+        const datos =
+          await respuesta.json();
 
-        estado.classList.remove(
-          "conectado"
+        if (!datos.actual)
+        {
+          mostrarSinDatos();
+          return;
+        }
+
+        actualizarInterfaz(
+          datos.actual
         );
-
       }
-    );
 
-
-    /* =========================
-       DESCONECTADO
-       ========================= */
-
-    cliente.on(
-      "offline",
-      function ()
+      catch (error)
       {
-
-        const estado =
-          document.getElementById(
-            "estadoMQTT"
-          );
-
-        estado.textContent =
-          "● MQTT desconectado";
-
-        estado.classList.remove(
-          "conectado"
-        );
-
-      }
-    );
-
-
-    /* =========================
-       ERROR
-       ========================= */
-
-    cliente.on(
-      "error",
-      function (error)
-      {
-
         console.error(
-          "Error MQTT:",
+          "Error consultando GHCS:",
           error
         );
 
         const estado =
           document.getElementById(
-            "estadoMQTT"
+            "estadoGHCS"
           );
 
         estado.textContent =
-          "● Error MQTT";
+          "● Error de conexión";
 
-        estado.classList.remove(
-          "conectado"
-        );
-
+        estado.className =
+          "estado-ghcs offline";
       }
-    );
+    }
 
 
     /* =========================
-       DATOS RECIBIDOS
+       ACTUALIZAR INTERFAZ
        ========================= */
 
-    cliente.on(
-      "message",
-      function (
-        topic,
-        mensaje
+    function actualizarInterfaz(datos)
+    {
+      if (!datos.time)
+      {
+        mostrarSinDatos();
+        return;
+      }
+
+      ultimoTimestamp =
+        new Date(datos.time).getTime();
+
+
+      /* TEMPERATURA */
+
+      if (
+        datos.temperatura !==
+        undefined &&
+        datos.temperatura !== null
       )
       {
+        document
+          .getElementById(
+            "temperatura"
+          )
+          .textContent =
+          Number(
+            datos.temperatura
+          ).toFixed(1) +
+          " °C";
+      }
 
-        const valor =
-          mensaje.toString();
+
+      /* HUMEDAD */
+
+      if (
+        datos.humedad !==
+        undefined &&
+        datos.humedad !== null
+      )
+      {
+        document
+          .getElementById(
+            "humedad"
+          )
+          .textContent =
+          Number(
+            datos.humedad
+          ).toFixed(1) +
+          " %";
+      }
 
 
-        console.log(
-          topic,
-          valor
+      /* VENTILADOR */
+
+      if (datos.ventilador)
+      {
+        actualizarVentilador(
+          datos.ventilador
+        );
+      }
+
+
+      /* MODO */
+
+      if (datos.modo)
+      {
+        actualizarModo(
+          datos.modo
+        );
+      }
+
+
+      /* BATERÍA */
+
+      if (
+        datos.bateria_porcentaje !==
+        undefined &&
+        datos.bateria_porcentaje !== null
+      )
+      {
+        const porcentaje =
+          Number(
+            datos.bateria_porcentaje
+          );
+
+        document
+          .getElementById(
+            "bateriaPorcentaje"
+          )
+          .textContent =
+          porcentaje.toFixed(0);
+
+        actualizarBateria(
+          porcentaje
+        );
+      }
+
+
+      /* VOLTAJE */
+
+      if (
+        datos.bateria_voltaje !==
+        undefined &&
+        datos.bateria_voltaje !== null
+      )
+      {
+        document
+          .getElementById(
+            "bateriaVoltaje"
+          )
+          .textContent =
+          Number(
+            datos.bateria_voltaje
+          ).toFixed(2);
+      }
+
+
+      actualizarEstadoGHCS();
+    }
+
+
+    /* =========================
+       ESTADO REAL DEL GHCS
+       ========================= */
+
+    function actualizarEstadoGHCS()
+    {
+      const estado =
+        document.getElementById(
+          "estadoGHCS"
+        );
+
+      const actualizacion =
+        document.getElementById(
+          "ultimaActualizacion"
         );
 
 
-        ultimaRecepcion =
-          Date.now();
+      if (!ultimoTimestamp)
+      {
+        estado.textContent =
+          "● Sin datos";
 
+        estado.className =
+          "estado-ghcs offline";
 
-        /* TEMPERATURA */
+        actualizacion.textContent =
+          "Sin datos";
 
-        if (
-          topic ===
-          "ghcs/temperatura"
-        )
-        {
-
-          document
-            .getElementById(
-              "temperatura"
-            )
-            .textContent =
-            valor + " °C";
-
-        }
-
-
-        /* HUMEDAD */
-
-        else if (
-          topic ===
-          "ghcs/humedad"
-        )
-        {
-
-          document
-            .getElementById(
-              "humedad"
-            )
-            .textContent =
-            valor + " %";
-
-        }
-
-
-        /* VENTILADOR */
-
-        else if (
-          topic ===
-          "ghcs/ventilador"
-        )
-        {
-
-          actualizarVentilador(
-            valor
-          );
-
-        }
-
-
-        /* MODO */
-
-        else if (
-          topic ===
-          "ghcs/modo"
-        )
-        {
-
-          actualizarModo(
-            valor
-          );
-
-        }
-
-
-        /* VOLTAJE */
-
-        else if (
-          topic ===
-          "ghcs/bateria/voltaje"
-        )
-        {
-
-          document
-            .getElementById(
-              "bateriaVoltaje"
-            )
-            .textContent =
-            valor;
-
-        }
-
-
-        /* PORCENTAJE BATERÍA */
-
-        else if (
-          topic ===
-          "ghcs/bateria/porcentaje"
-        )
-        {
-
-          document
-            .getElementById(
-              "bateriaPorcentaje"
-            )
-            .textContent =
-            valor;
-
-          actualizarBateria(
-            valor
-          );
-
-        }
-
+        return;
       }
-    );
+
+
+      const antiguedad =
+        Date.now() -
+        ultimoTimestamp;
+
+
+      /* ONLINE */
+
+      if (
+        antiguedad <=
+        LIMITE_ONLINE
+      )
+      {
+        estado.textContent =
+          "● GHCS online";
+
+        estado.className =
+          "estado-ghcs online";
+      }
+
+
+      /* DATOS ANTIGUOS */
+
+      else if (
+        antiguedad <=
+        LIMITE_OFFLINE
+      )
+      {
+        estado.textContent =
+          "● Sin datos recientes";
+
+        estado.className =
+          "estado-ghcs espera";
+      }
+
+
+      /* OFFLINE */
+
+      else
+      {
+        estado.textContent =
+          "● GHCS offline";
+
+        estado.className =
+          "estado-ghcs offline";
+      }
+
+
+      /* TEXTO ÚLTIMA ACTUALIZACIÓN */
+
+      const segundos =
+        Math.max(
+          0,
+          Math.floor(
+            antiguedad / 1000
+          )
+        );
+
+
+      if (segundos < 10)
+      {
+        actualizacion.textContent =
+          "Actualizado ahora";
+      }
+
+      else if (segundos < 60)
+      {
+        actualizacion.textContent =
+          "Hace " +
+          segundos +
+          " s";
+      }
+
+      else if (segundos < 3600)
+      {
+        const minutos =
+          Math.floor(
+            segundos / 60
+          );
+
+        actualizacion.textContent =
+          "Hace " +
+          minutos +
+          " min";
+      }
+
+      else if (segundos < 86400)
+      {
+        const horas =
+          Math.floor(
+            segundos / 3600
+          );
+
+        const minutos =
+          Math.floor(
+            (segundos % 3600) /
+            60
+          );
+
+        actualizacion.textContent =
+          "Hace " +
+          horas +
+          " h " +
+          minutos +
+          " min";
+      }
+
+      else
+      {
+        const dias =
+          Math.floor(
+            segundos / 86400
+          );
+
+        actualizacion.textContent =
+          "Hace " +
+          dias +
+          " días";
+      }
+    }
+
+
+    /* =========================
+       SIN DATOS
+       ========================= */
+
+    function mostrarSinDatos()
+    {
+      ultimoTimestamp = null;
+
+      const estado =
+        document.getElementById(
+          "estadoGHCS"
+        );
+
+      estado.textContent =
+        "● Sin datos";
+
+      estado.className =
+        "estado-ghcs offline";
+
+      document
+        .getElementById(
+          "ultimaActualizacion"
+        )
+        .textContent =
+        "Sin datos";
+    }
 
 
     /* =========================
@@ -793,65 +845,45 @@
       estado
     )
     {
-
       const elemento =
         document.getElementById(
           "ventilador"
         );
 
-
       elemento.textContent =
         estado;
-
 
       elemento.className =
         "estado-badge";
 
 
-      if (
-        estado === "APAGADO"
-      )
+      if (estado === "APAGADO")
       {
-
         elemento.classList.add(
           "vent-off"
         );
-
       }
 
-      else if (
-        estado === "V1"
-      )
+      else if (estado === "V1")
       {
-
         elemento.classList.add(
           "vent-v1"
         );
-
       }
 
-      else if (
-        estado === "V2"
-      )
+      else if (estado === "V2")
       {
-
         elemento.classList.add(
           "vent-v2"
         );
-
       }
 
-      else if (
-        estado === "V3"
-      )
+      else if (estado === "V3")
       {
-
         elemento.classList.add(
           "vent-v3"
         );
-
       }
-
     }
 
 
@@ -863,41 +895,31 @@
       modo
     )
     {
-
       const elemento =
         document.getElementById(
           "modo"
         );
 
-
       elemento.textContent =
         modo;
-
 
       elemento.className =
         "estado-badge";
 
 
-      if (
-        modo === "AUTO"
-      )
+      if (modo === "AUTO")
       {
-
         elemento.classList.add(
           "modo-auto"
         );
-
       }
 
       else
       {
-
         elemento.classList.add(
           "modo-manual"
         );
-
       }
-
     }
 
 
@@ -909,12 +931,8 @@
       valor
     )
     {
-
       let porcentaje =
-        parseFloat(
-          valor
-        );
-
+        parseFloat(valor);
 
       porcentaje =
         Math.max(
@@ -925,137 +943,68 @@
           )
         );
 
-
       const barra =
         document.getElementById(
           "rellenoBateria"
         );
-
 
       const tarjeta =
         document.getElementById(
           "tarjetaBateria"
         );
 
-
       barra.style.width =
         porcentaje + "%";
 
 
-      if (
-        porcentaje > 60
-      )
+      if (porcentaje > 60)
       {
-
         barra.style.background =
           "#63e6a3";
 
         tarjeta.style.borderLeftColor =
           "#63e6a3";
-
       }
 
-      else if (
-        porcentaje > 30
-      )
+      else if (porcentaje > 30)
       {
-
         barra.style.background =
           "#ffb84d";
 
         tarjeta.style.borderLeftColor =
           "#ffb84d";
-
       }
 
       else
       {
-
         barra.style.background =
           "#ff4d4d";
 
         tarjeta.style.borderLeftColor =
           "#ff4d4d";
-
       }
-
     }
 
 
     /* =========================
-       ÚLTIMA ACTUALIZACIÓN
+       INICIO
        ========================= */
 
+    consultarGHCS();
+
     setInterval(
-      function ()
-      {
+      consultarGHCS,
+      INTERVALO_CONSULTA
+    );
 
-        const elemento =
-          document.getElementById(
-            "ultimaActualizacion"
-          );
+    /*
+      Actualizamos el texto "Hace X min"
+      aunque todavía no toque consultar
+      de nuevo la API.
+    */
 
-
-        if (
-          ultimaRecepcion === null
-        )
-        {
-
-          elemento.textContent =
-            "Sin datos";
-
-          return;
-
-        }
-
-
-        const segundos =
-          Math.floor(
-            (
-              Date.now() -
-              ultimaRecepcion
-            ) / 1000
-          );
-
-
-        if (
-          segundos < 2
-        )
-        {
-
-          elemento.textContent =
-            "Actualizado ahora";
-
-        }
-
-        else if (
-          segundos < 60
-        )
-        {
-
-          elemento.textContent =
-            "Hace " +
-            segundos +
-            " s";
-
-        }
-
-        else
-        {
-
-          const minutos =
-            Math.floor(
-              segundos / 60
-            );
-
-          elemento.textContent =
-            "Hace " +
-            minutos +
-            " min";
-
-        }
-
-      },
+    setInterval(
+      actualizarEstadoGHCS,
       1000
     );
 
