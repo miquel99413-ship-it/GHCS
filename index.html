@@ -2094,20 +2094,31 @@ async function enviarComando(comando)
     );
 
   let token =
-    prompt(
-      "Introduce el token de control del GHCS:"
+    localStorage.getItem(
+      "ghcs_control_token"
     );
 
   if (!token)
   {
-    estado.textContent =
-      "Control cancelado";
+    token = prompt(
+      "Introduce el token de control del GHCS:"
+    );
 
-    return;
+    if (!token)
+    {
+      estado.textContent =
+        "Control cancelado";
+
+      return;
+    }
+
+    token = token.trim();
+
+    localStorage.setItem(
+      "ghcs_control_token",
+      token
+    );
   }
-
-  token =
-    token.trim();
 
   estado.textContent =
     "Enviando " +
@@ -2146,6 +2157,16 @@ async function enviarComando(comando)
 
     if (!respuesta.ok)
     {
+      if (
+        respuesta.status ===
+        401
+      )
+      {
+        localStorage.removeItem(
+          "ghcs_control_token"
+        );
+      }
+
       throw new Error(
         datos.error ||
         "Error HTTP " +
@@ -2158,9 +2179,20 @@ async function enviarComando(comando)
       comando +
       " enviado";
 
+    // Refrescos rápidos tras enviar el comando
+    setTimeout(
+      consultarGHCS,
+      500
+    );
+
     setTimeout(
       consultarGHCS,
       1500
+    );
+
+    setTimeout(
+      consultarGHCS,
+      3000
     );
   }
 
