@@ -2017,29 +2017,20 @@ async function enviarComando(comando)
     );
 
   let token =
-    localStorage.getItem(
-      "ghcs_control_token"
+    prompt(
+      "Introduce el token de control del GHCS:"
     );
 
   if (!token)
   {
-    token = prompt(
-      "Introduce el token de control del GHCS:"
-    );
+    estado.textContent =
+      "Control cancelado";
 
-    if (!token)
-    {
-      estado.textContent =
-        "Control cancelado";
-
-      return;
-    }
-
-    localStorage.setItem(
-      "ghcs_control_token",
-      token
-    );
+    return;
   }
+
+  token =
+    token.trim();
 
   estado.textContent =
     "Enviando " +
@@ -2078,16 +2069,6 @@ async function enviarComando(comando)
 
     if (!respuesta.ok)
     {
-      if (
-        respuesta.status ===
-        401
-      )
-      {
-        localStorage.removeItem(
-          "ghcs_control_token"
-        );
-      }
-
       throw new Error(
         datos.error ||
         "Error HTTP " +
@@ -2099,11 +2080,6 @@ async function enviarComando(comando)
       "✓ " +
       comando +
       " enviado";
-
-    /*
-      Esperamos un poco para que
-      ESP32 procese el comando.
-    */
 
     setTimeout(
       consultarGHCS,
