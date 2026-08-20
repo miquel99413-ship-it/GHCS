@@ -13,6 +13,9 @@
 
   <title>GHCS</title>
 
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     * {
       box-sizing: border-box;
@@ -48,7 +51,9 @@
       margin: 0 auto;
     }
 
-    /* CABECERA */
+    /* =========================
+       CABECERA
+       ========================= */
 
     .cabecera {
       margin-bottom: 24px;
@@ -66,7 +71,9 @@
       font-size: 14px;
     }
 
-    /* CONEXIÓN */
+    /* =========================
+       CONEXIÓN
+       ========================= */
 
     .conexion {
       display: flex;
@@ -102,7 +109,9 @@
       font-size: 12px;
     }
 
-    /* TARJETAS */
+    /* =========================
+       TARJETAS
+       ========================= */
 
     .tarjeta {
       position: relative;
@@ -149,7 +158,9 @@
       font-size: 42px;
     }
 
-    /* VENTILADOR Y MODO */
+    /* =========================
+       VENTILADOR / MODO
+       ========================= */
 
     .fila {
       display: grid;
@@ -196,7 +207,9 @@
       color: #ffb84d;
     }
 
-    /* BATERÍA */
+    /* =========================
+       BATERÍA
+       ========================= */
 
     .cabecera-bateria {
       display: flex;
@@ -236,10 +249,145 @@
         background-color 0.3s ease;
     }
 
-    /* PIE */
+    /* =========================
+       HISTÓRICO
+       ========================= */
+
+    .seccion-historico {
+      margin-top: 28px;
+    }
+
+    .cabecera-historico {
+      margin-bottom: 14px;
+    }
+
+    .titulo-historico {
+      margin: 0 0 4px;
+
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .subtitulo-historico {
+      margin: 0;
+
+      color: #7f8c8a;
+
+      font-size: 12px;
+    }
+
+    /* SELECTOR DE PERIODO */
+
+    .selector-periodo {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+
+      margin-bottom: 14px;
+
+      padding: 5px;
+
+      background: #151c1a;
+
+      border: 1px solid #293331;
+      border-radius: 12px;
+    }
+
+    .boton-periodo {
+      appearance: none;
+      border: 0;
+
+      padding: 9px 4px;
+
+      border-radius: 8px;
+
+      background: transparent;
+      color: #899592;
+
+      font-size: 13px;
+      font-weight: 600;
+
+      cursor: pointer;
+
+      transition:
+        background 0.2s ease,
+        color 0.2s ease;
+    }
+
+    .boton-periodo:hover {
+      color: #ffffff;
+    }
+
+    .boton-periodo.activo {
+      background: #28302f;
+      color: #63e6a3;
+    }
+
+    /* GRÁFICAS */
+
+    .tarjeta-grafica {
+      background: #19211f;
+
+      border: 1px solid #293331;
+
+      border-radius: 17px;
+
+      padding: 16px;
+
+      margin-bottom: 14px;
+    }
+
+    .tarjeta-grafica-temperatura {
+      border-left: 4px solid #ff7a00;
+    }
+
+    .tarjeta-grafica-humedad {
+      border-left: 4px solid #63e6a3;
+    }
+
+    .cabecera-grafica {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+
+      margin-bottom: 12px;
+    }
+
+    .titulo-grafica {
+      font-size: 14px;
+      font-weight: 600;
+      color: #c5cecc;
+    }
+
+    .dato-grafica {
+      color: #7f8c8a;
+      font-size: 11px;
+      text-align: right;
+    }
+
+    .contenedor-grafica {
+      position: relative;
+      width: 100%;
+      height: 220px;
+    }
+
+    .estado-historico {
+      margin-top: 8px;
+
+      text-align: center;
+
+      color: #667370;
+
+      font-size: 11px;
+    }
+
+    /* =========================
+       PIE
+       ========================= */
 
     .pie {
-      margin-top: 20px;
+      margin-top: 24px;
 
       text-align: center;
 
@@ -248,7 +396,9 @@
       font-size: 11px;
     }
 
-    /* MÓVIL */
+    /* =========================
+       MÓVIL
+       ========================= */
 
     @media (max-width: 430px) {
 
@@ -276,6 +426,10 @@
       .estado-badge {
         font-size: 23px;
       }
+
+      .contenedor-grafica {
+        height: 205px;
+      }
     }
 
     @media (max-width: 350px) {
@@ -283,13 +437,22 @@
       .fila {
         grid-template-columns: 1fr;
       }
+
+      .boton-periodo {
+        font-size: 12px;
+      }
     }
   </style>
 </head>
 
+
 <body>
 
   <main class="app">
+
+    <!-- =========================
+         CABECERA
+         ========================= -->
 
     <header class="cabecera">
 
@@ -300,6 +463,11 @@
       </p>
 
     </header>
+
+
+    <!-- =========================
+         ESTADO
+         ========================= -->
 
     <div class="conexion">
 
@@ -319,7 +487,10 @@
 
     </div>
 
-    <!-- TEMPERATURA -->
+
+    <!-- =========================
+         TEMPERATURA
+         ========================= -->
 
     <section class="tarjeta tarjeta-temperatura">
 
@@ -336,7 +507,10 @@
 
     </section>
 
-    <!-- HUMEDAD -->
+
+    <!-- =========================
+         HUMEDAD
+         ========================= -->
 
     <section class="tarjeta tarjeta-humedad">
 
@@ -353,7 +527,10 @@
 
     </section>
 
-    <!-- VENTILADOR / MODO -->
+
+    <!-- =========================
+         VENTILADOR / MODO
+         ========================= -->
 
     <div class="fila">
 
@@ -372,6 +549,7 @@
 
       </section>
 
+
       <section class="tarjeta">
 
         <div class="etiqueta">
@@ -389,7 +567,10 @@
 
     </div>
 
-    <!-- BATERÍA -->
+
+    <!-- =========================
+         BATERÍA
+         ========================= -->
 
     <section
       class="tarjeta tarjeta-bateria"
@@ -399,6 +580,7 @@
       <div class="etiqueta">
         Batería
       </div>
+
 
       <div class="cabecera-bateria">
 
@@ -410,6 +592,7 @@
 
         </div>
 
+
         <div class="voltaje">
 
           <span id="bateriaVoltaje">
@@ -419,6 +602,7 @@
         </div>
 
       </div>
+
 
       <div class="barra-bateria">
 
@@ -431,11 +615,152 @@
 
     </section>
 
+
+    <!-- =========================
+         HISTÓRICO
+         ========================= -->
+
+    <section class="seccion-historico">
+
+      <div class="cabecera-historico">
+
+        <h2 class="titulo-historico">
+          Histórico
+        </h2>
+
+        <p class="subtitulo-historico">
+          Temperatura y humedad registradas por el GHCS
+        </p>
+
+      </div>
+
+
+      <!-- SELECTOR -->
+
+      <div class="selector-periodo">
+
+        <button
+          class="boton-periodo"
+          data-periodo="1h"
+        >
+          1h
+        </button>
+
+        <button
+          class="boton-periodo"
+          data-periodo="6h"
+        >
+          6h
+        </button>
+
+        <button
+          class="boton-periodo activo"
+          data-periodo="24h"
+        >
+          24h
+        </button>
+
+        <button
+          class="boton-periodo"
+          data-periodo="7d"
+        >
+          7d
+        </button>
+
+      </div>
+
+
+      <!-- GRÁFICA TEMPERATURA -->
+
+      <div
+        class="
+          tarjeta-grafica
+          tarjeta-grafica-temperatura
+        "
+      >
+
+        <div class="cabecera-grafica">
+
+          <div class="titulo-grafica">
+            Temperatura
+          </div>
+
+          <div
+            class="dato-grafica"
+            id="rangoTemperatura"
+          >
+            --
+          </div>
+
+        </div>
+
+        <div class="contenedor-grafica">
+
+          <canvas
+            id="graficaTemperatura"
+          ></canvas>
+
+        </div>
+
+      </div>
+
+
+      <!-- GRÁFICA HUMEDAD -->
+
+      <div
+        class="
+          tarjeta-grafica
+          tarjeta-grafica-humedad
+        "
+      >
+
+        <div class="cabecera-grafica">
+
+          <div class="titulo-grafica">
+            Humedad
+          </div>
+
+          <div
+            class="dato-grafica"
+            id="rangoHumedad"
+          >
+            --
+          </div>
+
+        </div>
+
+        <div class="contenedor-grafica">
+
+          <canvas
+            id="graficaHumedad"
+          ></canvas>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="estado-historico"
+        id="estadoHistorico"
+      >
+        Cargando histórico...
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         PIE
+         ========================= -->
+
     <div class="pie">
       GHCS · Remote Monitoring
     </div>
 
   </main>
+
+
 
   <script>
 
@@ -443,16 +768,19 @@
        CONFIGURACIÓN API
        ========================= */
 
-    const API_URL =
-      "https://ghcs-api.miquel99413.workers.dev/datos";
+    const API_BASE =
+      "https://ghcs-api.miquel99413.workers.dev";
 
-    /*
-      InfluxDB recibe un registro cada 5 minutos.
+    const API_DATOS =
+      API_BASE + "/datos";
 
-      < 7 min  = ONLINE
-      7-15 min = SIN DATOS RECIENTES
-      > 15 min = OFFLINE
-    */
+    const API_HISTORICO =
+      API_BASE + "/historico";
+
+
+    /* =========================
+       TIEMPOS
+       ========================= */
 
     const LIMITE_ONLINE =
       7 * 60 * 1000;
@@ -461,20 +789,41 @@
       15 * 60 * 1000;
 
     /*
-      Consultamos Cloudflare cada 30 segundos.
-
-      Esto NO hace que InfluxDB almacene más datos.
-      Solo comprueba si existe un registro nuevo.
+      Datos actuales:
+      cada 30 segundos.
     */
 
-    const INTERVALO_CONSULTA =
+    const INTERVALO_DATOS =
       30 * 1000;
 
-    let ultimoTimestamp = null;
+    /*
+      Histórico:
+      cada 5 minutos.
+    */
+
+    const INTERVALO_HISTORICO =
+      5 * 60 * 1000;
 
 
     /* =========================
-       CONSULTAR GHCS
+       VARIABLES
+       ========================= */
+
+    let ultimoTimestamp =
+      null;
+
+    let periodoActual =
+      "24h";
+
+    let graficaTemperatura =
+      null;
+
+    let graficaHumedad =
+      null;
+
+
+    /* =========================
+       CONSULTAR DATOS ACTUALES
        ========================= */
 
     async function consultarGHCS()
@@ -483,7 +832,7 @@
       {
         const respuesta =
           await fetch(
-            API_URL,
+            API_DATOS,
             {
               cache: "no-store"
             }
@@ -492,7 +841,8 @@
         if (!respuesta.ok)
         {
           throw new Error(
-            "HTTP " + respuesta.status
+            "HTTP " +
+            respuesta.status
           );
         }
 
@@ -535,7 +885,9 @@
        ACTUALIZAR INTERFAZ
        ========================= */
 
-    function actualizarInterfaz(datos)
+    function actualizarInterfaz(
+      datos
+    )
     {
       if (!datos.time)
       {
@@ -543,8 +895,11 @@
         return;
       }
 
+
       ultimoTimestamp =
-        new Date(datos.time).getTime();
+        new Date(
+          datos.time
+        ).getTime();
 
 
       /* TEMPERATURA */
@@ -552,7 +907,8 @@
       if (
         datos.temperatura !==
         undefined &&
-        datos.temperatura !== null
+        datos.temperatura !==
+        null
       )
       {
         document
@@ -572,7 +928,8 @@
       if (
         datos.humedad !==
         undefined &&
-        datos.humedad !== null
+        datos.humedad !==
+        null
       )
       {
         document
@@ -589,7 +946,9 @@
 
       /* VENTILADOR */
 
-      if (datos.ventilador)
+      if (
+        datos.ventilador
+      )
       {
         actualizarVentilador(
           datos.ventilador
@@ -599,7 +958,9 @@
 
       /* MODO */
 
-      if (datos.modo)
+      if (
+        datos.modo
+      )
       {
         actualizarModo(
           datos.modo
@@ -612,7 +973,8 @@
       if (
         datos.bateria_porcentaje !==
         undefined &&
-        datos.bateria_porcentaje !== null
+        datos.bateria_porcentaje !==
+        null
       )
       {
         const porcentaje =
@@ -638,7 +1000,8 @@
       if (
         datos.bateria_voltaje !==
         undefined &&
-        datos.bateria_voltaje !== null
+        datos.bateria_voltaje !==
+        null
       )
       {
         document
@@ -657,7 +1020,7 @@
 
 
     /* =========================
-       ESTADO REAL DEL GHCS
+       ESTADO REAL GHCS
        ========================= */
 
     function actualizarEstadoGHCS()
@@ -693,8 +1056,6 @@
         ultimoTimestamp;
 
 
-      /* ONLINE */
-
       if (
         antiguedad <=
         LIMITE_ONLINE
@@ -706,9 +1067,6 @@
         estado.className =
           "estado-ghcs online";
       }
-
-
-      /* DATOS ANTIGUOS */
 
       else if (
         antiguedad <=
@@ -722,9 +1080,6 @@
           "estado-ghcs espera";
       }
 
-
-      /* OFFLINE */
-
       else
       {
         estado.textContent =
@@ -735,24 +1090,27 @@
       }
 
 
-      /* TEXTO ÚLTIMA ACTUALIZACIÓN */
-
       const segundos =
         Math.max(
           0,
           Math.floor(
-            antiguedad / 1000
+            antiguedad /
+            1000
           )
         );
 
 
-      if (segundos < 10)
+      if (
+        segundos < 10
+      )
       {
         actualizacion.textContent =
           "Actualizado ahora";
       }
 
-      else if (segundos < 60)
+      else if (
+        segundos < 60
+      )
       {
         actualizacion.textContent =
           "Hace " +
@@ -760,11 +1118,14 @@
           " s";
       }
 
-      else if (segundos < 3600)
+      else if (
+        segundos < 3600
+      )
       {
         const minutos =
           Math.floor(
-            segundos / 60
+            segundos /
+            60
           );
 
         actualizacion.textContent =
@@ -773,16 +1134,22 @@
           " min";
       }
 
-      else if (segundos < 86400)
+      else if (
+        segundos < 86400
+      )
       {
         const horas =
           Math.floor(
-            segundos / 3600
+            segundos /
+            3600
           );
 
         const minutos =
           Math.floor(
-            (segundos % 3600) /
+            (
+              segundos %
+              3600
+            ) /
             60
           );
 
@@ -798,7 +1165,8 @@
       {
         const dias =
           Math.floor(
-            segundos / 86400
+            segundos /
+            86400
           );
 
         actualizacion.textContent =
@@ -815,7 +1183,8 @@
 
     function mostrarSinDatos()
     {
-      ultimoTimestamp = null;
+      ultimoTimestamp =
+        null;
 
       const estado =
         document.getElementById(
@@ -857,28 +1226,40 @@
         "estado-badge";
 
 
-      if (estado === "APAGADO")
+      if (
+        estado ===
+        "APAGADO"
+      )
       {
         elemento.classList.add(
           "vent-off"
         );
       }
 
-      else if (estado === "V1")
+      else if (
+        estado ===
+        "V1"
+      )
       {
         elemento.classList.add(
           "vent-v1"
         );
       }
 
-      else if (estado === "V2")
+      else if (
+        estado ===
+        "V2"
+      )
       {
         elemento.classList.add(
           "vent-v2"
         );
       }
 
-      else if (estado === "V3")
+      else if (
+        estado ===
+        "V3"
+      )
       {
         elemento.classList.add(
           "vent-v3"
@@ -907,7 +1288,10 @@
         "estado-badge";
 
 
-      if (modo === "AUTO")
+      if (
+        modo ===
+        "AUTO"
+      )
       {
         elemento.classList.add(
           "modo-auto"
@@ -932,7 +1316,9 @@
     )
     {
       let porcentaje =
-        parseFloat(valor);
+        parseFloat(
+          valor
+        );
 
       porcentaje =
         Math.max(
@@ -942,6 +1328,7 @@
             porcentaje
           )
         );
+
 
       const barra =
         document.getElementById(
@@ -953,25 +1340,33 @@
           "tarjetaBateria"
         );
 
+
       barra.style.width =
-        porcentaje + "%";
+        porcentaje +
+        "%";
 
 
-      if (porcentaje > 60)
+      if (
+        porcentaje > 60
+      )
       {
         barra.style.background =
           "#63e6a3";
 
-        tarjeta.style.borderLeftColor =
+        tarjeta.style
+          .borderLeftColor =
           "#63e6a3";
       }
 
-      else if (porcentaje > 30)
+      else if (
+        porcentaje > 30
+      )
       {
         barra.style.background =
           "#ffb84d";
 
-        tarjeta.style.borderLeftColor =
+        tarjeta.style
+          .borderLeftColor =
           "#ffb84d";
       }
 
@@ -980,10 +1375,592 @@
         barra.style.background =
           "#ff4d4d";
 
-        tarjeta.style.borderLeftColor =
+        tarjeta.style
+          .borderLeftColor =
           "#ff4d4d";
       }
     }
+
+
+    /* =========================
+       HISTÓRICO
+       ========================= */
+
+    async function consultarHistorico(
+      periodo =
+      periodoActual
+    )
+    {
+      const estado =
+        document.getElementById(
+          "estadoHistorico"
+        );
+
+      estado.textContent =
+        "Actualizando histórico...";
+
+
+      try
+      {
+        const respuesta =
+          await fetch(
+            API_HISTORICO +
+            "?periodo=" +
+            encodeURIComponent(
+              periodo
+            ),
+            {
+              cache:
+                "no-store"
+            }
+          );
+
+
+        if (
+          !respuesta.ok
+        )
+        {
+          throw new Error(
+            "HTTP " +
+            respuesta.status
+          );
+        }
+
+
+        const datos =
+          await respuesta.json();
+
+
+        dibujarHistorico(
+          datos
+        );
+
+
+        estado.textContent =
+          datos.puntos +
+          " registros · " +
+          periodo;
+      }
+
+      catch (error)
+      {
+        console.error(
+          "Error histórico:",
+          error
+        );
+
+        estado.textContent =
+          "Error cargando histórico";
+      }
+    }
+
+
+    /* =========================
+       DIBUJAR HISTÓRICO
+       ========================= */
+
+    function dibujarHistorico(
+      datos
+    )
+    {
+      const temperaturas =
+        datos.temperatura ||
+        [];
+
+      const humedades =
+        datos.humedad ||
+        [];
+
+
+      /* TEMPERATURA */
+
+      const etiquetasTemp =
+        temperaturas.map(
+          punto =>
+            formatearFechaGrafica(
+              punto.time
+            )
+        );
+
+      const valoresTemp =
+        temperaturas.map(
+          punto =>
+            Number(
+              punto.value
+            )
+        );
+
+
+      /* HUMEDAD */
+
+      const etiquetasHum =
+        humedades.map(
+          punto =>
+            formatearFechaGrafica(
+              punto.time
+            )
+        );
+
+      const valoresHum =
+        humedades.map(
+          punto =>
+            Number(
+              punto.value
+            )
+        );
+
+
+      actualizarRangos(
+        valoresTemp,
+        valoresHum
+      );
+
+
+      /* DESTRUIR GRÁFICAS ANTERIORES */
+
+      if (
+        graficaTemperatura
+      )
+      {
+        graficaTemperatura
+          .destroy();
+      }
+
+
+      if (
+        graficaHumedad
+      )
+      {
+        graficaHumedad
+          .destroy();
+      }
+
+
+      /* =========================
+         GRÁFICA TEMPERATURA
+         ========================= */
+
+      graficaTemperatura =
+        new Chart(
+          document
+            .getElementById(
+              "graficaTemperatura"
+            ),
+          {
+            type:
+              "line",
+
+            data:
+            {
+              labels:
+                etiquetasTemp,
+
+              datasets:
+              [
+                {
+                  label:
+                    "Temperatura",
+
+                  data:
+                    valoresTemp,
+
+                  borderColor:
+                    "#ff7a00",
+
+                  backgroundColor:
+                    "rgba(255,122,0,0.10)",
+
+                  borderWidth:
+                    2,
+
+                  pointRadius:
+                    valoresTemp.length >
+                    60
+                      ? 0
+                      : 2,
+
+                  pointHoverRadius:
+                    5,
+
+                  tension:
+                    0.25,
+
+                  fill:
+                    true
+                }
+              ]
+            },
+
+            options:
+              opcionesGrafica(
+                "°C"
+              )
+          }
+        );
+
+
+      /* =========================
+         GRÁFICA HUMEDAD
+         ========================= */
+
+      graficaHumedad =
+        new Chart(
+          document
+            .getElementById(
+              "graficaHumedad"
+            ),
+          {
+            type:
+              "line",
+
+            data:
+            {
+              labels:
+                etiquetasHum,
+
+              datasets:
+              [
+                {
+                  label:
+                    "Humedad",
+
+                  data:
+                    valoresHum,
+
+                  borderColor:
+                    "#63e6a3",
+
+                  backgroundColor:
+                    "rgba(99,230,163,0.10)",
+
+                  borderWidth:
+                    2,
+
+                  pointRadius:
+                    valoresHum.length >
+                    60
+                      ? 0
+                      : 2,
+
+                  pointHoverRadius:
+                    5,
+
+                  tension:
+                    0.25,
+
+                  fill:
+                    true
+                }
+              ]
+            },
+
+            options:
+              opcionesGrafica(
+                "%"
+              )
+          }
+        );
+    }
+
+
+    /* =========================
+       OPCIONES CHART.JS
+       ========================= */
+
+    function opcionesGrafica(
+      unidad
+    )
+    {
+      return {
+        responsive:
+          true,
+
+        maintainAspectRatio:
+          false,
+
+        interaction:
+        {
+          intersect:
+            false,
+
+          mode:
+            "index"
+        },
+
+        plugins:
+        {
+          legend:
+          {
+            display:
+              false
+          },
+
+          tooltip:
+          {
+            displayColors:
+              false,
+
+            callbacks:
+            {
+              label:
+                function (
+                  contexto
+                )
+                {
+                  return (
+                    contexto
+                      .parsed
+                      .y
+                      .toFixed(1) +
+                    " " +
+                    unidad
+                  );
+                }
+            }
+          }
+        },
+
+        scales:
+        {
+          x:
+          {
+            grid:
+            {
+              display:
+                false
+            },
+
+            ticks:
+            {
+              color:
+                "#71807c",
+
+              maxTicksLimit:
+                6,
+
+              maxRotation:
+                0,
+
+              autoSkip:
+                true
+            },
+
+            border:
+            {
+              color:
+                "#33403d"
+            }
+          },
+
+          y:
+          {
+            grid:
+            {
+              color:
+                "rgba(120,140,135,0.12)"
+            },
+
+            ticks:
+            {
+              color:
+                "#71807c",
+
+              callback:
+                function (
+                  valor
+                )
+                {
+                  return (
+                    valor +
+                    unidad
+                  );
+                }
+            },
+
+            border:
+            {
+              display:
+                false
+            }
+          }
+        }
+      };
+    }
+
+
+    /* =========================
+       FORMATO FECHA
+       ========================= */
+
+    function formatearFechaGrafica(
+      timestamp
+    )
+    {
+      const fecha =
+        new Date(
+          timestamp
+        );
+
+
+      if (
+        periodoActual ===
+        "7d"
+      )
+      {
+        return fecha
+          .toLocaleDateString(
+            "es-ES",
+            {
+              day:
+                "2-digit",
+
+              month:
+                "2-digit"
+            }
+          );
+      }
+
+
+      return fecha
+        .toLocaleTimeString(
+          "es-ES",
+          {
+            hour:
+              "2-digit",
+
+            minute:
+              "2-digit"
+          }
+        );
+    }
+
+
+    /* =========================
+       MÍN / MÁX
+       ========================= */
+
+    function actualizarRangos(
+      temperaturas,
+      humedades
+    )
+    {
+      const rangoTemp =
+        document.getElementById(
+          "rangoTemperatura"
+        );
+
+      const rangoHum =
+        document.getElementById(
+          "rangoHumedad"
+        );
+
+
+      if (
+        temperaturas.length >
+        0
+      )
+      {
+        const minimo =
+          Math.min(
+            ...temperaturas
+          );
+
+        const maximo =
+          Math.max(
+            ...temperaturas
+          );
+
+        rangoTemp.textContent =
+          minimo.toFixed(1) +
+          " / " +
+          maximo.toFixed(1) +
+          " °C";
+      }
+
+      else
+      {
+        rangoTemp.textContent =
+          "--";
+      }
+
+
+      if (
+        humedades.length >
+        0
+      )
+      {
+        const minimo =
+          Math.min(
+            ...humedades
+          );
+
+        const maximo =
+          Math.max(
+            ...humedades
+          );
+
+        rangoHum.textContent =
+          minimo.toFixed(1) +
+          " / " +
+          maximo.toFixed(1) +
+          " %";
+      }
+
+      else
+      {
+        rangoHum.textContent =
+          "--";
+      }
+    }
+
+
+    /* =========================
+       SELECTOR PERIODO
+       ========================= */
+
+    document
+      .querySelectorAll(
+        ".boton-periodo"
+      )
+      .forEach(
+        boton =>
+        {
+          boton
+            .addEventListener(
+              "click",
+              function ()
+              {
+                periodoActual =
+                  this.dataset
+                    .periodo;
+
+
+                document
+                  .querySelectorAll(
+                    ".boton-periodo"
+                  )
+                  .forEach(
+                    b =>
+                      b.classList
+                        .remove(
+                          "activo"
+                        )
+                  );
+
+
+                this.classList
+                  .add(
+                    "activo"
+                  );
+
+
+                consultarHistorico(
+                  periodoActual
+                );
+              }
+            );
+        }
+      );
 
 
     /* =========================
@@ -992,16 +1969,33 @@
 
     consultarGHCS();
 
-    setInterval(
-      consultarGHCS,
-      INTERVALO_CONSULTA
+    consultarHistorico(
+      periodoActual
     );
 
-    /*
-      Actualizamos el texto "Hace X min"
-      aunque todavía no toque consultar
-      de nuevo la API.
-    */
+
+    /* DATOS ACTUALES */
+
+    setInterval(
+      consultarGHCS,
+      INTERVALO_DATOS
+    );
+
+
+    /* HISTÓRICO */
+
+    setInterval(
+      function ()
+      {
+        consultarHistorico(
+          periodoActual
+        );
+      },
+      INTERVALO_HISTORICO
+    );
+
+
+    /* TEXTO "HACE X MIN" */
 
     setInterval(
       actualizarEstadoGHCS,
