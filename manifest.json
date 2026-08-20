@@ -1,0 +1,13 @@
+{
+  "name": "GHCS - Greenhouse Climate System",
+  "short_name": "GHCS",
+  "description": "Greenhouse Climate System - Monitorización y control remoto",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#08110e",
+  "theme_color": "#08110e",
+  "orientation": "portrait-primary",
+  "lang": "es",
+  "icons": []
+}
